@@ -1,0 +1,188 @@
+input : review data
+
+nCnt = 0
+let preprocess() = 
+	foreach line in stdin:
+		// each line is a review
+		data = split the line and extract the review text
+		convert the review text to lower case.
+		tokenize the review text to remove special characters.
+		remove stop words from the text
+		perform stemming on the review text
+		nCnt = nCnt + 1 
+		emit(nCnt + "::" + preprocessed_review_text)
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+input : preprocessed file
+
+Mapper
+--------
+let map(k,v) = 
+	foreach line in stdin:
+		data = split the line on "::"
+		lineNum = data[0]
+		reviewTxt = data[1]
+		
+		nPos = 0
+		foreach word in reviewTxt:
+			emit(word, (nLineNum + "," + nPos))
+			nPos = nPos + 1
+
+Reducer
+---------
+current_key = null
+dictInvIdx = new Dictionary()
+
+let addToDictionary(word, val):
+    if !(word in dictionary dictInvIdx):
+		create a list and add val to it.
+		add this list to dictionary dictInvIdx for that word
+	else:
+		append the val for the word to the existing list value.
+
+let emitInvIdx(word):
+    invertedIndexes = dictInvIdx[word]
+    invIdxStr = create a single string by joining the data on '|'
+    print current_key + "::" + invIdxStr
+
+let reduce(k,vals) = 
+	foreach line in stdin:
+		Split line into a list to get(key and val)
+		if current_key != null and current_key != key:
+			emitInvIdx(current_key)
+			
+			delete the old key from dictionary as its already emitted.
+			current_key = key
+			addToDictionary(current_key, val)
+		else
+			current_key = key
+			addToDictionary(key, val)
+			
+	emitInvIdx(current_key)
+
+
+
+-----------------------------------------------------------------
+
+
+input : preprocessed file
+
+Mapper1
+--------
+let map(k,v) = 
+	foreach line in stdin:
+		data = split the line on "::"
+		lineNum = data[0]
+		reviewTxt = data[1]
+		
+		nPos = 0
+		foreach word in reviewTxt:
+			emit((word,nLineNum), 1)
+			
+Reducer1
+---------
+current_key = null
+sum = 0
+
+let reduce(k,vals) = 
+	foreach line in stdin:
+		Split line into a list to get(key and val)
+		if current_key != null and current_key != key:
+			emit(current_key, sum)
+			
+			sum = 0
+			current_key = key
+			sum = sum + val
+		else
+			current_key = key
+			sum = sum + val
+			
+	emit(current_key, sum)
+	
+-------------------------------------------------------------
+
+
+-----------------------------------------------------------------
+input = output from the previous mapreduce task
+
+Mapper2
+--------
+let map(k,v) = 
+	foreach line in stdin:
+		data = split the line on "\t"
+		key = data[0]
+		val = data[1]
+		emit(key, val)
+		
+Reducer2
+---------
+current_key = null
+lstVal = new List()
+
+let reduce(k,vals) = 
+	foreach line in stdin:
+		Split line into a list to get(key1 and val1)
+		split the key1 on "," to get wordkey and linekey
+		
+		if current_key != null and current_key != key:
+			outVal = create a single string by joining the items in lstVal by "|"
+			emit(current_key, outVal)
+			
+			lstVal = []
+			current_key = wordkey
+			val2 = linekey + "," + val1
+			add val2 to lstVal
+			
+		else
+			current_key = key
+			val2 = linekey + "," + val1
+			add val2 to lstVal
+	
+	outVal = create a single string by joining the items in lstVal by "|"
+	emit(current_key, outVal)
+
+
+
+
+-----------------------------------------------------------------
+
+
+
+Mapper2
+--------
+let map(k,v) = 
+	foreach line in stdin:
+		data = split the line on "\t"
+		key = data[0]
+		val = data[1]
+		emit(key, val)
+		
+Reducer2
+---------
+current_key = null
+lstVal = new List()
+
+let reduce(k,vals) = 
+	foreach line in stdin:
+		Split line into a list to get(key and val)
+		
+		if current_key != null and current_key != key:
+			outVal = create a single string by joining the items in lstVal by "|"
+			emit(current_key, outVal)
+			
+			lstVal = []
+			current_key = key
+			add val1 to lstVal
+			
+		else
+			current_key = key
+			add val2 to lstVal
+	
+	outVal = create a single string by joining the items in lstVal by "|"
+	emit(current_key, outVal)
+	
+	
+	
+	

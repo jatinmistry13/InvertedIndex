@@ -1,0 +1,12 @@
+Code description for clustering sub task
+stateGenerator.py - script for preprocessing and separating the names from values and storing ids to different files along with the mapped version of it
+
+Join.py - joins the cluster assignments to the business ids with the other features
+
+stateMapper.py - generates the plots on google maps for each state
+
+spark.py - contains code to be run on pySpark - python shell for SPARK, performs clustering and saving clustering assignments
+
+.csv files - They contain the features for businesses of that state, along with cluster assignment, where the first and the last index is the cluster assignment, second index is mapped id, third index  is actual id and the remaining are specified in the names.cv file
+
+.html files - are maps containing plots of the businesses for that state, which include latitude, longitude and rating
